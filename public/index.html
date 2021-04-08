@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
+	 <meta charset="UTF-8">
+	 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  </head>
+  <body onload = "refreshYelp()">
+
+    <div class="container-fluid">
+      
+      <!-- Container for the title-->
+      <div class="row">
+        <div class="jumbotron col">
+          <h1>Social Review</h1> 
+        </div>
+      </div>
+
+      <!-- Container for the rest of the page-->
+      <div class="row mid-content">
+
+        <!-- Container for the map-->
+        <div class="col-sm-9 map-container">
+            <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+          <div id="map"></div>
+        </div>
+
+        <!-- Container for the sidebar-->
+		
+        <div class="col-sm-3 info-container">
+		<div class="scrollable">
+          <div>
+            <h1 id="content-to-change">Restaurant Reviews</h1>
+            <p id="from-server"></p>
+            <a id="link" target="_blank" href=""></a>
+          </div>
+		  
+				<div class="tab">
+				<button class="tablinks" onclick="openCity(event, 'yelpPlace')">YelpReviews</button>
+				<button class="tablinks" onclick="openCity(event, 'TWAD')">Twitter</button>
+				</div>
+
+				<div id="yelpPlace" class="tabcontent"> <h3> YelpReviews: </h3>
+				
+				</div>				
+					<div id=TWAD  class="tabcontent"> <h3> Social Media: </h3> </div>
+					<p id="tweets"></p>
+		</div>
+          <div class="scrollable">
+		  <div id="tableContent">	
+				<table id="myTable">
+				<thead>
+					<tr>
+					<th>Location</th>
+					<th>Rating</th>
+					</tr>
+				</thead>
+				<tbody>
+				<!-- 3 more rows here --> 
+				</tbody>
+				</table>
+				</div>
+           
+          </div>
+        
+		</div>
+		</div>
+      </div>   
+    </div>
+      
+	
+	<script sync src="https://platform.twitter.com/widgets.js"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDD3dI9f3yBke_acuCHjUjtu7rIdE_-Jlg&libraries=places&callback=initAutocomplete" defer></script> <!-- Script for Google Maps API-->
+    <script src="/socket.io/socket.io.js"></script> <!-- Script for Socket IO API (FIXME when hosting somewhere new)--> 
+    <script>
+
+      //map variable
+      var map;
+      //socket io variable - talks front end to backend 
+      var socket = io();
+      //array of map markers
+      var markerArray = [];
+      //window that opens when marker is clicked
+      var infoWindow;
+      //object that makes clusters
+      var markerCluster;
+
+
+      //caches the bounds
+      var queriedBounds;
+
+
+      //starts the map
+      function initAutocomplete() {
+         
+        //make the map
+        map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: 30.615011, lng:  -96.342476},
+          zoom: 15,
+          disableDefaultUI: true
+        });
+
+
+        var noPoi = [
+          {
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#ebe3cd"
+              }
+            ]
+          },
+          {
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#523735"
+              }
+            ]
+          },
+          {
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#f5f1e6"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#c9b2a6"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.land_parcel",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#dcd2be"
+              }
+            ]
+          },
+          {
+            "featureType": "administrative.land_parcel",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#ae9e90"
+              }
+            ]
+          },
+          {
+            "featureType": "landscape.natural",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#dfd2ae"
+              }
+            ]
+          },
+          {
+            "featureType": "poi",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "poi",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#dfd2ae"
+              }
+            ]
+          },
+          {
+            "featureType": "poi",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#93817c"
+              }
+            ]
+          },
+          {
+            "featureType": "poi.park",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#a5b076"
+              }
+            ]
+          },
+          {
+            "featureType": "poi.park",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#447530"
+              }
+            ]
+          },
+          {
+            "featureType": "road",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#f5f1e6"
+              }
+            ]
+          },
+          {
+            "featureType": "road",
+            "elementType": "labels.icon",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "road.arterial",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#fdfcf8"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#f8c967"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#e9bc62"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway.controlled_access",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#e98d58"
+              }
+            ]
+          },
+          {
+            "featureType": "road.highway.controlled_access",
+            "elementType": "geometry.stroke",
+            "stylers": [
+              {
+                "color": "#db8555"
+              }
+            ]
+          },
+          {
+            "featureType": "road.local",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#806b63"
+              }
+            ]
+          },
+          {
+            "featureType": "transit",
+            "stylers": [
+              {
+                "visibility": "off"
+              }
+            ]
+          },
+          {
+            "featureType": "transit.line",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#dfd2ae"
+              }
+            ]
+          },
+          {
+            "featureType": "transit.line",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#8f7d77"
+              }
+            ]
+          },
+          {
+            "featureType": "transit.line",
+            "elementType": "labels.text.stroke",
+            "stylers": [
+              {
+                "color": "#ebe3cd"
+              }
+            ]
+          },
+          {
+            "featureType": "transit.station",
+            "elementType": "geometry",
+            "stylers": [
+              {
+                "color": "#dfd2ae"
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "geometry.fill",
+            "stylers": [
+              {
+                "color": "#b9d3c2"
+              }
+            ]
+          },
+          {
+            "featureType": "water",
+            "elementType": "labels.text.fill",
+            "stylers": [
+              {
+                "color": "#92998d"
+              }
+            ]
+          }
+        ];
+
+        map.setOptions({styles: noPoi});
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_CENTER].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+
+
+
+
+        //if the map is dragged, re-query yelp.
+        map.addListener('dragend', function() {
+          //see if drag change warrants a re-query
+          if(checkToRefresh()){
+            refreshYelp();
+          }
+        });
+
+        //if the zoom changes, re-query yelp. 
+        map.addListener('zoom_changed', function() {
+          //see if zoom change warrants a re-query
+          if(checkToRefresh()){
+            refreshYelp();
+          }
+          if(map.zoom > 18){
+            map.setMapTypeId('satellite');
+          }
+          if(map.zoom <= 18){
+            map.setMapTypeId('roadmap');
+          }
+        });
+
+        infoWindow = new google.maps.InfoWindow;
+
+        markerCluster = new MarkerClusterer(map, markerArray, {maxZoom: 17, imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+      
+        queriedBounds = new google.maps.LatLngBounds(map.getBounds());
+      }
+	
+
+      function checkToRefresh(){
+        NELatLng = map.getBounds().getNorthEast();
+        SWLatLng = map.getBounds().getSouthWest();
+
+        if(queriedBounds.contains(NELatLng) && queriedBounds.contains(SWLatLng))
+          return false;
+        
+        if(map.zoom < 14)
+          return false;
+
+
+
+          return true;
+      }
+
+                
+      function addMarker(latLng, name, busID){            
+        
+        var newMarker = new google.maps.Marker({
+          position: latLng,
+          map: map,
+          title: name,
+          id: busID
+        });
+        
+        newMarker.addListener('click', function(){
+          infoWindow.setContent(
+            '<div id="content">'+
+            '<div id="siteNotice">'+
+            '</div>'+
+            '<h1 id="firstHeading" class="firstHeading">' + name + '</h1>'+
+            '</div>'+
+            '</div>'
+          );
+          infoWindow.open(map, newMarker);
+          displayReviews(newMarker);
+        });
+
+        markerArray.push(newMarker);
+      }
+
+      // Deletes all markers in the markerArray
+      function deleteMarkers() {
+        for (var i = 0; i < markerArray.length; i++) {
+          markerArray[i].setMap(null);
+        }
+        markerArray = [];
+        markerCluster.clearMarkers();
+      }
+
+      //this function finds the center to look around and the range it needs to look at and sends it to the backend
+      function refreshYelp(){
+
+        topLongitude = Math.abs(map.getBounds().getNorthEast().lng());
+        leftLatitude = Math.abs(map.getBounds().getSouthWest().lat());
+        centerLongitude =  Math.abs(map.getCenter().lng());
+        centerLatitude =  Math.abs(map.getCenter().lat());
+        verticalDistance = Math.abs(111021*(topLongitude - centerLongitude));
+        horizontalDistance = Math.abs(96540*(leftLatitude - centerLatitude));
+
+        //pythagorean theorem of vertical and horizontal distances, rounded up to nearest integer of miles
+        maxDistance = Math.ceil(Math.sqrt(Math.pow(verticalDistance,2) + Math.pow(horizontalDistance,2)));
+
+        //creates an object with relevant info
+        var locationInfo = {
+          cLatitude: map.getCenter().lat(),
+          cLongitude: map.getCenter().lng(),
+          range: maxDistance 
+        };
+
+        //calls the backend event "newView" with the new location data
+        socket.emit('newView', locationInfo);
+
+        //sets the new boundes that have been queried
+        queriedBounds = map.getBounds();
+      }
+
+
+      //executes when it receives the new markers for businesses
+      socket.on('updatedInfo', function(businesses){
+      
+        deleteMarkers();
+       
+        for (var i = 0; i < businesses.length; i++) {
+          thisBus = businesses[i];
+          busLat = thisBus.coordinates.latitude;
+          busLong = thisBus.coordinates.longitude;
+          busName = thisBus.name;
+          busID = thisBus.id
+          busLatLng = new google.maps.LatLng(busLat, busLong);
+          addMarker(busLatLng, busName, busID);
+        }
+
+        markerCluster.addMarkers(markerArray);
+
+        console.log("num returned" + businesses.length);
+
+      });
+	
+	function removeYelp()
+	{
+		var myNode1 = document.getElementById("yelpPlace");
+			myNode1.innerHTML = '';
+	}
+      //executes when it receives review data for a business
+      socket.on('showReviews', function(reviews){
+        
+        
+        //will recieve up to 3 yelp reviews
+	//make div scrollable
+	//yelp reveiws
+        //display the business name
+		removeYelp();
+		var i;
+		for (i = 0; i < reviews.length; i++) { 
+        //document.getElementById("from-server").innerHTML = reviews[i].text;
+        //document.getElementById("link").innerHTML = "Click to see whole review";
+        //document.getElementById("link").setAttribute("href", reviews[i].url);
+		var x = document.createElement("SPAN");
+		var y = document.createAttribute("data-review-id");
+		y.value = reviews[i].id;
+		x.className ="yelp-review";
+		x.setAttributeNode(y);
+		var z = document.createAttribute("data-hostname");
+		z.value = "www.yelp.com";
+		x.setAttributeNode(z);
+		var js_script = document.createElement('script');
+		
+		document.getElementById("yelpPlace").appendChild(x);
+		js_script.type = "text/javascript";
+		js_script.src ="https://www.yelp.com/embed/widgets.js";
+		js_script.async = true;
+		x.appendChild(js_script);
+		
+		
+		
+		
+        }
+      });
+		
+		function myFunct(){
+			var myNode = document.getElementById("TWAD");
+			myNode.innerHTML = '';
+		}
+		function roundHalf(num) {
+			return Math.round(num*2)/2;
+		}
+		var count = 0;
+      socket.on('showTweets', function(twitterInfo){
+        
+        tweetArray = twitterInfo.tweets;
+        starRating = twitterInfo.rating;
+
+        
+        myFunct();
+		var i;
+		for (i = 0; i < tweetArray.length; i++) { 
+		twttr.widgets.createTweet(
+		tweetArray[i].id_str, document.getElementById("TWAD"), 
+		{
+        conversation : 'none',    // or all
+        cards        : 'hidden',  // or visible 
+        linkColor    : '#cc0000', // default is blue
+        theme        : 'light'    // or dark
+		});
+		}
+        console.log("Tweet 1: " + tweetArray[0]);
+        console.log("Score: " + starRating);
+		if(starRating != null)
+		{
+			//console.log(busName);
+			var table = document.getElementById("myTable");
+			var createElm = document.createElement("tr");
+			var name = busName;
+			createElm.className = document.getElementById("content-to-change").innerHTML + count;
+			var createTD = document.createElement("td");
+			createTD.innerHTML = document.getElementById("content-to-change").innerHTML;
+			var createTD1 = document.createElement("td");
+			var createDiv = document.createElement("div");
+			createDiv.className = "stars-outer";
+			var createDiv1 = document.createElement("div");
+			createDiv1.className = "stars-inner";
+			createDiv1.id = "temp";
+			createTD1.appendChild(createDiv);
+			createDiv.appendChild(createDiv1);
+			createElm.appendChild(createTD);
+			createElm.appendChild(createTD1);
+			table.appendChild(createElm);
+			var value = starRating;
+			var convertToV = (value/5)* 100;
+			var valueStr = convertToV.toString(10);
+			var valueStrPercent = valueStr + "%";
+			createDiv1.style.width = valueStrPercent;
+			count++;
+		}
+		
+        
+      });
+	function openCity(evt, cityName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(cityName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+      
+
+	  //display the business name
+      //executes when a business is clicked
+      function displayReviews(currMarker){
+        //get name and ID of business from the marker clicked
+        var busName = currMarker.title;
+        var busID = currMarker.id;
+
+        var businessInfo = {
+          busID: busID,
+          busName: busName
+        }
+        
+        
+        //display the business name
+        document.getElementById("content-to-change").innerHTML = busName;
+
+        //call server side to fetch review info
+        socket.emit('getReviews', businessInfo);
+      }
+
+    </script>
+    <script src="clusters/markerclusterer.js"></script>
+	<script async="async" src="https://www.yelp.com/embed/widgets.js" type="text/javascript"></script>
+  </body>
+</html>
+
+
+
+
+  

@@ -1,0 +1,131 @@
+html, body {
+    height: 100%;
+    margin: 0;
+  }
+  
+  .mid-content {
+    flex-grow: 1;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .container-fluid {
+    display: flex;
+    flex-flow: column;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  .scrollable {
+  height: 500px;
+  overflow-y: scroll;
+}
+
+table {
+  margin: 0 auto;
+  text-align: center;
+  border-collapse: collapse;
+  border: 1px solid #d4d4d4;
+  font-size: 20px;
+  background: #fff;
+}
+ .tab {
+  overflow: hidden;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+}
+table th, 
+table tr:nth-child(2n+2) {
+  background: #e7e7e7;
+}
+  
+table th, 
+table td {
+  padding: 20px 50px;
+}
+  
+table th {
+  border-bottom: 1px solid #d4d4d4;
+}
+.stars-outer {
+  display: inline-block;
+  position: relative;
+  font-family: FontAwesome;
+}
+ 
+.stars-outer::before {
+  content: "\f006 \f006 \f006 \f006 \f006";
+}
+ 
+.stars-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+}
+ 
+.stars-inner::before {
+  content: "\f005 \f005 \f005 \f005 \f005";
+  color: #f8ce0b;
+}
+
+  .jumbotron {
+    margin: 0px;
+    padding: 0;
+    text-align: center;
+    background-color:white;
+  }
+  
+  .row{
+    margin:0;
+    padding: 0;
+  }
+  
+  
+  .info-container{
+    margin:0;
+    padding: 0;
+    background-color:gray;
+	
+  }
+  
+  .map-container {
+    margin:0;
+    padding: 0;
+  }
+
+  #map {
+    height:100%;
+  }

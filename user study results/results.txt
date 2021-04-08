@@ -1,0 +1,27 @@
+1.1 Participant 1: does not use yelp
+1.2 Participant 2: "heard of it" (does not use yelp)
+1.3 Participant 3: does not use yelp
+
+2.1 Participant 1: has not experienced misleading reviews
+2.2 Participant 2: has experienced misleading reviews
+2.3 Participant 3: has not experience misleading reviews
+
+3.1 Participant 1: does "take into account" comments from social media
+3.2 Participant 2: values input from social media to get a better idea of product
+3.3 Participant 3: values social media comments
+
+4.1 Participant 1: The map is easy to navigate for the most part but is in need of a search bar
+4.2 Participant 2: the map is intuitive but hampered by need to zoom in to see all businesses
+4.3 Participant 3: simple, easy to use design; but, all businesses should be able to be seen without zooming
+
+5.1 Participant 1: Review layout looks good
+5.2 Participant 2: review layout is easily navigable (needs color improvement but has yet to be implemented)
+5.3 Participant 3: layout is intuitive
+
+6.1 Participant 1: having a localized map is a nice feature
+6.2 Participant 2: clean layout, fairly intuitive
+6.3 Participant 3: no clutter, easy to use
+
+7.1 Participant 1: no search bar for location or business severely limits ease of use
+7.2 Participant 2: did not provide a feature needing most improvement
+7.3 Participant 3: did not provide a feature needing most improvement
